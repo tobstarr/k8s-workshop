@@ -1,0 +1,36 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  labels:
+    run: jenkins
+  name: jenkins
+  namespace: kube-system
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      run: jenkins
+  template:
+    metadata:
+      labels:
+        run: jenkins
+    spec:
+      containers:
+      - name: jenkins
+        image: quay.io/tobstarr/jenkins:2.23
+        volumeMounts:
+        - mountPath: /var/jenkins_home
+          name: data
+        - mountPath: /var/run/docker.sock
+          name: docker-socket
+        env:
+        - name: JAVA_OPTS
+          value: -Djenkins.install.runSetupWizard=false
+      volumes:
+      - name: data
+        gcePersistentDisk:
+          pdName: jenkins
+      - name: docker-socket
+        hostPath:
+          path: /var/run/docker.sock
+
